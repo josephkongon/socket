@@ -19,8 +19,10 @@ using namespace std;
 void PANIC(char* msg);
 #define PANIC(msg)  { perror(msg); exit(-1); }
 
-string* getvalues(); 
-char* getReply(string);
+string* getvalues(string); 
+string getMsg(string ); 
+
+void getReply(string,int,string);
 /*--------------------------------------------------------------------*/
 /*--- Child - echo server                                         ---*/
 
@@ -36,34 +38,32 @@ void* Child(void* arg)
     int client = *(int *)arg;
     char recvbuf[DEFAULT_BUFLEN],bmsg[DEFAULT_BUFLEN];
     int  recvbuflen = DEFAULT_BUFLEN;
+    bool firstBoot = 1;
 
     do
     {
-        bytes_read = recv(client, line, sizeof(line), 0);
-        cout<<line;
-        if (bytes_read > 0) {
-                char *replay=getReply(line);
-                bytes_read=send(client, replay, sizeof(replay), 0);
+        //send clien the first message
+        if(firstBoot){
+            char snd[]="Welcome to Bob's file server\n";
+            bytes_read=send(client, snd, sizeof(snd), 0);
                 if ( bytes_read < 0 ) {
                         printf("Send failed\n");
                         break;
                 }
+            firstBoot=0;
+        }
+
+        bytes_read = recv(client, line, sizeof(line), 0);
+        cout<<line;
+        if (bytes_read > 0) {
+                string factor =getMsg(line);
+
                 
+                getReply(factor,client,line); // returns msg to send to use based on  user input
+               
+                
+                memset(line,0,sizeof(line));
 
-
-                //sending and receiving
-           /*     bytes_read = recv(fd, line, sizeof(line), 0);
-                if (bytes_read < 0) {
-                    printf("Send failed:\n");
-                    close(fd);
-                    break;
-                }
-                */
-
-
-
-
-                //end
         } else if (bytes_read == 0 ) {
                 printf("Connection closed by client\n");
                 break;
@@ -76,20 +76,17 @@ void* Child(void* arg)
     return arg;
 }
 
-/*--------------------------------------------------------------------*/
-/*--- main - setup server and await connections (no need to clean  ---*/
-/*--- up after terminated children.                                ---*/
-/*--------------------------------------------------------------------*/
-char* getReply(string){
-    
-}
+
+
 int main(int argc, char *argv[])
 {   int sd,opt,optval;
     struct sockaddr_in addr;
     socklen_t length;
     unsigned short port=0;
   
-    //string* values=getvalues();
+    //string str;
+    //getline(cin,str);
+    //string* values=getvalues(str);
     
 
     while ((opt = getopt(argc, argv, "p:")) != -1) {
@@ -141,10 +138,125 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-string* getvalues(){
-    string str;
-    getline(cin,str);
-    cout<<str<<endl;
+void getReply(string str,int client,string Str1){
+  
+    cout<<Str1<<"str";
+    vector<string> vector;
+    stringstream ss(str);
+    int bytes_read;
+
+  
+    while (ss.good())
+    {
+        
+        string substring="";
+        getline(ss, substring, ',');
+        if(substring=="")
+        {
+            vector.push_back(str);
+        }
+        vector.push_back(substring);
+    }
+    int n = vector.size();
+    string arr[n];
+    for(int i = 0; i<vector.size(); i++)
+    {
+        arr[i]=vector[i];
+    }
+  
+
+    if(arr[0]=="user" || arr[0]=="USER"){
+        //user acces
+        char msg[]="200 User test grated access\n";
+        bytes_read=send(client, msg, sizeof(msg), 0);
+                if ( bytes_read < 0 ) {
+                        printf("Send failed\n");
+                        
+                }
+    }
+
+    else if(arr[0]=="list"){
+        //list files
+        char msg[]="list of all files\n";
+        bytes_read=send(client, msg, sizeof(msg), 0);
+                if ( bytes_read < 0 ) {
+                        printf("Send failed\n");
+                        
+                }
+    }
+      else if(arr[0]=="get"){
+        //list files
+        char msg[]="read file content\n";
+        bytes_read=send(client, msg, sizeof(msg), 0);
+                if ( bytes_read < 0 ) {
+                        printf("Send failed\n");
+                        
+                }
+    }
+    else if(arr[0]=="del"){
+        //list files
+        char msg[]="file delete\n";
+        bytes_read=send(client, msg, sizeof(msg), 0);
+                if ( bytes_read < 0 ) {
+                        printf("Send failed\n");
+                        
+                }
+    }
+    else if(arr[0]=="quit"){
+        //list files
+        char msg[]="read file content\n";
+        bytes_read=send(client, msg, sizeof(msg), 0);
+                if ( bytes_read < 0 ) {
+                        printf("Send failed\n");
+                        
+                }
+    }
+
+    else{
+          char msg[]="to e handled\n";
+        bytes_read=send(client, msg, sizeof(msg), 0);
+                if ( bytes_read < 0 ) {
+                        printf("Send failed\n");
+                        
+                }
+    }
+    
+    
+
+
+}
+
+string getMsg(string str){
+   
+    string proStr="";
+    string trStr;
+    int i=0;
+    //str.erase(remove(str.begin(), str.end(), ' '), str.end());
+    cout<<str.length();
+    for(i; i<str.length()-1;i++)
+    {
+       if(str[i]==' ')
+        {
+            proStr+=",";
+            
+        }
+        else if(str[i]=='\0')
+        {
+            break;
+            
+        }
+        else
+        {
+            proStr+=str[i];
+        }
+    };
+  
+
+    return proStr;
+}
+
+string* getvalues(string str){
+    
     string proStr="";
     string trStr;
     int i=0;
@@ -160,7 +272,6 @@ string* getvalues(){
             proStr+=str[i];
         }
     }
-    cout<<proStr<<endl;
     vector<string> vector;
     stringstream ss(proStr);
 
@@ -175,6 +286,10 @@ string* getvalues(){
     for(int i = 0; i<vector.size(); i++)
     {
         arr[i]=vector[i];
+    }
+    for(int i = 0; i<(sizeof(arr)/sizeof(arr[0])); i++)
+    {
+
         cout<<arr[i]<<" "<<endl;
     }
     return arr;
