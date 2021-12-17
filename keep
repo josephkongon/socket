@@ -1,0 +1,29 @@
+string sev,dir,pas;
+        //getline(ss, substring, " -d ");
+        //get server
+        int sI= value.find(" -d ");
+        string sStr=value.substr(sI-1);
+        vector.push_back(sStr);
+        
+        // get directry
+        string dStr=value.substr(sI+1);
+        vector.push_back(dStr);
+
+        //get port number
+        int pI= value.find(" -p ");
+        string pStr=value.substr(pI+1);
+        vector.push_back(pStr);
+
+        //get password
+        int uI= value.find(" -u ");
+        string uStr=value.substr(uI+1);
+        vector.push_back(uStr);
+
+        int n = vector.size();
+        string arr[n];
+        for(int i = 0; i<n; i++)
+        {
+            arr[i]=vector[i];
+            cout<<arr[i]<<" "<<endl;
+        }
+        return arr;
