@@ -1,0 +1,71 @@
+Convert a string to a char array in C++
+This post will discuss how to convert a string to a char array in C++.
+
+1. Using strcpy function
+The idea is to use the c_str() function to convert the std::string to a C-string. Then we can simply call the strcpy() function to copy the C-string into a char array.
+
+#include <iostream>
+#include <string>
+#include <cstring>
+ 
+int main()
+{
+    std::string s = "Hello World!";
+ 
+    char cstr[s.size() + 1];
+    strcpy(cstr, s.c_str());    // or, pass `&s[0]`
+ 
+    std::cout << cstr << std::endl;
+ 
+    return 0;
+}
+Download  Run Code
+
+Output:
+
+Hello World!
+
+2. Using std::string::copy function
+We know that the strcpy() is a C function. We can avoid using that in C++ by using std::string::copy instead.
+
+#include <iostream>
+#include <string>
+ 
+int main()
+{
+    std::string s = "Hello World!";
+ 
+    char cstr[s.size() + 1];
+    s.copy(cstr, s.size() + 1);
+    cstr[s.size()] = '\0';
+ 
+    std::cout << cstr << std::endl;
+ 
+    return 0;
+}
+Download  Run Code
+
+Output:
+
+Hello World!
+
+3. Using std::copy function
+Finally, the <algorithm> header also provides the standard copy algorithm `std::copy, which can be used in the following manner:
+
+#include <iostream>
+#include <string>
+#include <algorithm>
+ 
+int main()
+{
+    std::string s = "Hello World!";
+ 
+    char cstr[s.size() + 1];
+ 
+    std::copy(s.begin(), s.end(), cstr);
+    cstr[s.size()] = '\0';
+ 
+    std::cout << cstr << std::endl;
+ 
+    return 0;
+}
