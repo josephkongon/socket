@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <fstream>
+#include <sstream> 
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
@@ -11,14 +13,23 @@
 #include <iostream>
 #include <vector>
 #include <bits/stdc++.h>
+#include <filesystem>
+#include <dirent.h>
+#include <sys/stat.h>
+
+
+
 /* Definations */
 using namespace std;
+
 #define DEFAULT_BUFLEN 1024
 #define PORT 1888
+
 
 void PANIC(char* msg);
 #define PANIC(msg)  { perror(msg); exit(-1); }
 
+string space(string);
 string* getvalues(string); 
 string getMsg(string ); 
 
@@ -137,11 +148,26 @@ int main(int argc, char *argv[])
     }
     return 0;
 }
+string space(string str){
+    
+    string final="";
+    int i=0;
+    while (str[i]!='\0')
+    {
+        if(!isspace(str[i])){
+            final+=str[i];
+
+        }
+        i++;
+    }
+   return final;
+
+}
 
 void getReply(string str,int client,string Str1){
   
-    cout<<Str1<<"str";
-    vector<string> vector;
+    //cout<<Str1<<"str";
+    vector<string> vt;
     stringstream ss(str);
     int bytes_read;
 
@@ -153,31 +179,113 @@ void getReply(string str,int client,string Str1){
         getline(ss, substring, ',');
         if(substring=="")
         {
-            vector.push_back(str);
+            vt.push_back(str);
         }
-        vector.push_back(substring);
+        vt.push_back(substring);
     }
-    int n = vector.size();
+    int n = vt.size();
     string arr[n];
-    for(int i = 0; i<vector.size(); i++)
+    for(int i = 0; i<vt.size(); i++)
     {
-        arr[i]=vector[i];
+        
+        arr[i]=vt[i];
     }
   
-
+    string ls =space(arr[0]);
+    FILE *fp;
     if(arr[0]=="user" || arr[0]=="USER"){
         //user acces
         char msg[]="200 User test grated access\n";
-        bytes_read=send(client, msg, sizeof(msg), 0);
+        char line[1024];
+
+        if ((fp = fopen("users.txt", "r")) == NULL)
+	        {
+	        	cout<<" could not read file !"<<endl;
+	        	
+			}
+        
+	    while (fgets(line, 1024, fp) != NULL) {
+         //cout<<line<<endl;
+        
+        vector<string> getUser;
+        stringstream ss(line);
+
+        while (ss.good())
+        {
+            
+            string substring="";
+            getline(ss, substring, ':');
+            getUser.push_back(substring);
+        }
+        
+        string name=space(getUser[0]);
+        string password=space(getUser[1]);
+
+        string uName=space(arr[1]);
+        string upass=space(arr[2]);
+
+        
+        if(uName==name && upass==password)
+        {
+            bytes_read=send(client, msg, sizeof(msg), 0);
                 if ( bytes_read < 0 ) {
-                        printf("Send failed\n");
-                        
+                    printf("Send failed\n");
                 }
+            break;
+        }
+            
+        memset(line,0,sizeof(line));
+	}
+	fclose(fp);
+    
     }
 
-    else if(arr[0]=="list"){
+    
+    else if(ls=="list"){
         //list files
         char msg[]="list of all files\n";
+        //
+        //reading all files in directory
+        char path[]="./files";
+        
+        DIR *dir;
+        dir=opendir(path);
+        struct dirent *enter;
+       
+        
+
+        if(!dir){
+            cout<<"directry not found";
+            return;
+        }
+
+        while ((enter=readdir(dir))!=NULL)
+        {
+            if(enter->d_name[0] != '.'){
+                std::string p =string(path)+'/'+ string(enter->d_name);
+                //string sp=space(p);
+               
+                string fname=string(enter->d_name);
+
+                char cstr[p.size() + 1];
+                strcpy(cstr, p.c_str());
+
+                //get file size
+                FILE* fp = fopen(cstr, "r");
+                if (fp == NULL) {
+                    cout<< "file doesnt exist \n";
+                    return;
+                    
+                }
+                fseek(fp, 0L, SEEK_END);
+                long int ans= ftell(fp);
+                fclose(fp);
+                cout<<fname<<" "<<ans<<"byets"<<endl;
+            }
+        }
+        
+       
+
         bytes_read=send(client, msg, sizeof(msg), 0);
                 if ( bytes_read < 0 ) {
                         printf("Send failed\n");
@@ -232,7 +340,7 @@ string getMsg(string str){
     string trStr;
     int i=0;
     //str.erase(remove(str.begin(), str.end(), ' '), str.end());
-    cout<<str.length();
+    //cout<<str.length();
     for(i; i<str.length()-1;i++)
     {
        if(str[i]==' ')
