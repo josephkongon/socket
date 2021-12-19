@@ -67,6 +67,8 @@ void* Child(void* arg)
         bytes_read = recv(client, line, sizeof(line), 0);
         cout<<line;
         if (bytes_read > 0) {
+                
+
                 string factor =getMsg(line);
 
                 
@@ -331,7 +333,7 @@ void getReply(string str,int client,string Str1){
                         
                 }
     }
-    else if(arr[0]=="del"){
+     else if(arr[0]=="put"){
         //list files
         char msg[]="file delete\n";
         bytes_read=send(client, msg, sizeof(msg), 0);
@@ -340,14 +342,46 @@ void getReply(string str,int client,string Str1){
                         
                 }
     }
-    else if(arr[0]=="quit"){
-        //list files
-        char msg[]="read file content\n";
+    else if(arr[0]=="del"){
+        //delete file from directory
+
+          string path="./files";
+        
+
+
+        std::string f=string(path)+'/'+string(arr[1]);
+        string s=space(f);
+        char cstr[s.size() + 1];
+        strcpy(cstr, s.c_str());
+        cout<<cstr<<s.size()<<endl;
+
+        int state=remove(cstr);
+
+        if(state==0){
+            cout<<"file delete"<<endl;
+        }
+        else{
+            cout<<"ERROR"<<endl;
+        }
+
+
+        char msg[]="file delete\n";
         bytes_read=send(client, msg, sizeof(msg), 0);
                 if ( bytes_read < 0 ) {
                         printf("Send failed\n");
                         
                 }
+    }
+    else if(arr[0]=="quit"){
+
+        //close client connection to server
+        char msg[]="good bye!\n";
+        bytes_read=send(client, msg, sizeof(msg), 0);
+                if ( bytes_read < 0 ) {
+                        printf("Send failed\n");
+                        
+                }
+        close(client);
     }
 
     else{
