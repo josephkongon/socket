@@ -294,6 +294,36 @@ void getReply(string str,int client,string Str1){
     }
       else if(arr[0]=="get"){
         //list files
+        string path="./files";
+        
+
+
+        std::string f=string(path)+'/'+string(arr[1]);
+        string s=space(f);
+        char cstr[s.size() + 1];
+        strcpy(cstr, s.c_str());
+        cout<<cstr<<s.size()<<endl;
+
+        ifstream myfile(cstr);
+        string l;
+        //myfile.open(cstr);
+        if(!myfile){
+            cout<<"no file";
+        }
+        while (getline(myfile,l))
+        {
+            cout<<l;
+        }
+    
+        //FILE* fp = fopen(cstr, "r");
+        //if (fp == NULL) {
+       //     cout<< "file doesnt exist \n";
+        //        return;
+        //}
+            
+        myfile.close();
+               
+           
         char msg[]="read file content\n";
         bytes_read=send(client, msg, sizeof(msg), 0);
                 if ( bytes_read < 0 ) {
