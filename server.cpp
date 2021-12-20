@@ -96,11 +96,6 @@ int main(int argc, char *argv[])
     struct sockaddr_in addr;
     socklen_t length;
     unsigned short port=0;
-  
-    //string str;
-    //getline(cin,str);
-    //string* values=getvalues(str);
-    
 
     while ((opt = getopt(argc, argv, "p:")) != -1) {
         switch (opt) {
@@ -317,12 +312,7 @@ void getReply(string str,int client,string Str1){
             cout<<l;
         }
     
-        //FILE* fp = fopen(cstr, "r");
-        //if (fp == NULL) {
-       //     cout<< "file doesnt exist \n";
-        //        return;
-        //}
-            
+
         myfile.close();
                
            
@@ -334,8 +324,61 @@ void getReply(string str,int client,string Str1){
                 }
     }
      else if(arr[0]=="put"){
-        //list files
-        char msg[]="file delete\n";
+        //copy file
+
+        string path="./files";
+        
+
+
+        //std::string f=string(path)+'/'+string(arr[1]);
+
+        std::string f=string(arr[1]);
+        string s=space(f);
+        char cstr[s.size() + 1];
+        strcpy(cstr, s.c_str());
+        cout<<cstr<<s.size()<<endl;
+
+        ifstream myfile(cstr);
+        string l;
+        //myfile.open(cstr);
+        if(!myfile){
+            cout<<"no file";
+        }
+        string content="";
+        while (getline(myfile,l))
+        {
+            content+=l+"\n";
+        }
+        cout<<content<<endl;
+
+        //getting the files name from the directory
+        vector<string> vn;
+        stringstream sst(arr[1]);
+        int bytes_read;
+
+    
+        while (sst.good())
+        {
+            
+            string substring="";
+            getline(sst, substring, '/');
+            if(substring=="")
+            {
+                vn.push_back(str);
+            }
+            vn.push_back(substring);
+        }
+        int x = vn.size();
+        string fn= vn[x-1];
+
+        cout<<fn<<endl;
+    
+
+        myfile.close();
+
+
+
+        char msg[]="put file\n";
         bytes_read=send(client, msg, sizeof(msg), 0);
                 if ( bytes_read < 0 ) {
                         printf("Send failed\n");
