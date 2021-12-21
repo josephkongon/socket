@@ -190,6 +190,7 @@ void getReply(string str,int client,string Str1){
   
     string ls =space(arr[0]);
     FILE *fp;
+
     if(arr[0]=="user" || arr[0]=="USER"){
         //user acces
         char msg[]="200 User test grated access\n";
@@ -230,6 +231,15 @@ void getReply(string str,int client,string Str1){
                 }
             break;
         }
+        else{
+            char m[]="400 user not found. please try another user";
+              bytes_read=send(client, m, sizeof(m), 0);
+                if ( bytes_read < 0 ) {
+                    printf("Send failed\n");
+                }
+            break;
+        }
+
             
         memset(line,0,sizeof(line));
 	}
@@ -255,7 +265,7 @@ void getReply(string str,int client,string Str1){
             cout<<"directry not found";
             return;
         }
-
+        string content="";
         while ((enter=readdir(dir))!=NULL)
         {
             if(enter->d_name[0] != '.'){
@@ -275,19 +285,28 @@ void getReply(string str,int client,string Str1){
                     
                 }
                 fseek(fp, 0L, SEEK_END);
-                long int ans= ftell(fp);
+                long int ansz= ftell(fp);
                 fclose(fp);
-                cout<<fname<<" "<<ans<<"byets"<<endl;
+
+                stringstream nm;
+                nm<<ansz;
+                string c;
+                nm>>c;
+
+                content+=string(fname)+" "+string(c)+" Bytes\n";
+                
             }
         }
+                char msgz[content.size() + 1];
+                strcpy(msgz, content.c_str());
+                bytes_read=send(client, msgz, sizeof(msgz), 0);
+                        if ( bytes_read < 0 ) {
+                                printf("Send failed\n");
+                                
+                        }
         
        
 
-        bytes_read=send(client, msg, sizeof(msg), 0);
-                if ( bytes_read < 0 ) {
-                        printf("Send failed\n");
-                        
-                }
     }
       else if(arr[0]=="get"){
         //list files
@@ -299,7 +318,6 @@ void getReply(string str,int client,string Str1){
         string s=space(f);
         char cstr[s.size() + 1];
         strcpy(cstr, s.c_str());
-        cout<<cstr<<s.size()<<endl;
 
         ifstream myfile(cstr);
         string l;
@@ -307,21 +325,41 @@ void getReply(string str,int client,string Str1){
         if(!myfile){
             cout<<"no file";
         }
+        string contect="";
+        bool ex=false;
         while (getline(myfile,l))
         {
-            cout<<l;
+            contect+=l+"\n";
+            ex=true;
         }
-    
-
+        contect+=".\n";
         myfile.close();
-               
-           
-        char msg[]="read file content\n";
+
+        if(ex==true){
+        char msg[contect.size() + 1];
+        strcpy(msg, contect.c_str());
         bytes_read=send(client, msg, sizeof(msg), 0);
                 if ( bytes_read < 0 ) {
                         printf("Send failed\n");
                         
                 }
+
+        }
+        else{
+            string stm="404 file "+string(arr[1])+" not found\n";
+             char msg[stm.size() + 1];
+             strcpy(msg, stm.c_str());
+            bytes_read=send(client, msg, sizeof(msg), 0);
+                if ( bytes_read < 0 ) {
+                        printf("Send failed\n");
+                        
+                }
+
+        }
+    
+
+               
+           
     }
      else if(arr[0]=="put"){
         //copy file
@@ -349,7 +387,8 @@ void getReply(string str,int client,string Str1){
         {
             content+=l+"\n";
         }
-        cout<<content<<endl;
+    
+        myfile.close();
 
         //getting the files name from the directory
         vector<string> vn;
@@ -372,18 +411,68 @@ void getReply(string str,int client,string Str1){
         string fn= vn[x-1];
 
         cout<<fn<<endl;
-    
+        std::string fl=string(path)+'/'+string(fn);
 
-        myfile.close();
+        char cflc[fl.size() + 1];
+        strcpy(cflc, fl.c_str());
+
+        //creating file and writing to file
+        ofstream newfile;
+        newfile.open(fl);
+        bool w=false;
+        
+        if(newfile.is_open()){
+            newfile<<content;
+            w=true;
+
+            newfile.close();
+        }
+        else{
+
+        }
+
+        FILE* fz = fopen(cstr, "r");
+            if (fz == NULL) {
+                cout<< "file doesnt exist \n";
+                    return;
+                    
+                }
+            fseek(fz, 0L, SEEK_END);
+            long int fsans= ftell(fz);
+            fclose(fz);
+                
 
 
+        if(w){
+            stringstream nm;
+            nm<<fsans;
+            string c;
+             nm>>c;
 
-        char msg[]="put file\n";
-        bytes_read=send(client, msg, sizeof(msg), 0);
+            std::string mstr="200 "+string(c)+" Bytes file was retrieved by server and was saved\n";
+            char msg[mstr.size() + 1];
+            strcpy(msg, mstr.c_str());
+            bytes_read=send(client, msg, sizeof(msg), 0);
                 if ( bytes_read < 0 ) {
                         printf("Send failed\n");
                         
                 }
+        }
+        else{
+
+            std::string mstr="400 File cannot save on server side.\n";
+            char msg[mstr.size() + 1];
+            strcpy(msg, mstr.c_str());
+            bytes_read=send(client, msg, sizeof(msg), 0);
+                if ( bytes_read < 0 ) {
+                        printf("Send failed\n");
+                        
+                }
+
+        }
+
+
+
     }
     else if(arr[0]=="del"){
         //delete file from directory
@@ -401,19 +490,31 @@ void getReply(string str,int client,string Str1){
         int state=remove(cstr);
 
         if(state==0){
-            cout<<"file delete"<<endl;
+
+            
+            std::string mstr="200 "+string(arr[1])+" deleted\n";
+            char msg[mstr.size() + 1];
+            strcpy(msg, mstr.c_str());
+
+            bytes_read=send(client, msg, sizeof(msg), 0);
+                    if ( bytes_read < 0 ) {
+                            printf("Send failed\n");
+                            
+                    }
         }
         else{
-            cout<<"ERROR"<<endl;
+            std::string mstr="404 "+string(arr[1])+" is not on the server\n";
+            char msg[mstr.size() + 1];
+            strcpy(msg, mstr.c_str());
+
+            bytes_read=send(client, msg, sizeof(msg), 0);
+                    if ( bytes_read < 0 ) {
+                            printf("Send failed\n");
+                            
+                    }
         }
 
 
-        char msg[]="file delete\n";
-        bytes_read=send(client, msg, sizeof(msg), 0);
-                if ( bytes_read < 0 ) {
-                        printf("Send failed\n");
-                        
-                }
     }
     else if(arr[0]=="quit"){
 
@@ -428,7 +529,7 @@ void getReply(string str,int client,string Str1){
     }
 
     else{
-          char msg[]="to e handled\n";
+          char msg[]="command does not exit\n";
         bytes_read=send(client, msg, sizeof(msg), 0);
                 if ( bytes_read < 0 ) {
                         printf("Send failed\n");
