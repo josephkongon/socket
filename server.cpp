@@ -23,16 +23,18 @@
 using namespace std;
 
 #define DEFAULT_BUFLEN 1024
-#define PORT 1888
 
 
 void PANIC(char* msg);
 #define PANIC(msg)  { perror(msg); exit(-1); }
 
 string space(string);
-string* getvalues(string); 
+void getvalues(); 
 string getMsg(string ); 
 
+int PORT;
+bool users=false;
+string filePath;
 void getReply(string,int,string);
 /*--------------------------------------------------------------------*/
 /*--- Child - echo server                                         ---*/
@@ -96,6 +98,8 @@ int main(int argc, char *argv[])
     struct sockaddr_in addr;
     socklen_t length;
     unsigned short port=0;
+
+   getvalues();
 
     while ((opt = getopt(argc, argv, "p:")) != -1) {
         switch (opt) {
@@ -226,13 +230,14 @@ void getReply(string str,int client,string Str1){
         if(uName==name && upass==password)
         {
             bytes_read=send(client, msg, sizeof(msg), 0);
+                users=true;
                 if ( bytes_read < 0 ) {
                     printf("Send failed\n");
                 }
             break;
         }
         else{
-            char m[]="400 user not found. please try another user";
+            char m[]="400 user not found. please try another user\n";
               bytes_read=send(client, m, sizeof(m), 0);
                 if ( bytes_read < 0 ) {
                     printf("Send failed\n");
@@ -247,8 +252,9 @@ void getReply(string str,int client,string Str1){
     
     }
 
+if(users){
     
-    else if(ls=="list"){
+    if(ls=="list"){
         //list files
         char msg[]="list of all files\n";
         //
@@ -520,7 +526,9 @@ void getReply(string str,int client,string Str1){
 
         //close client connection to server
         char msg[]="good bye!\n";
+        users=false;
         bytes_read=send(client, msg, sizeof(msg), 0);
+
                 if ( bytes_read < 0 ) {
                         printf("Send failed\n");
                         
@@ -536,7 +544,8 @@ void getReply(string str,int client,string Str1){
                         
                 }
     }
-    
+}
+
     
 
 
@@ -571,8 +580,10 @@ string getMsg(string str){
     return proStr;
 }
 
-string* getvalues(string str){
+void getvalues(){
     
+    string str;
+    getline(cin,str);
     string proStr="";
     string trStr;
     int i=0;
@@ -608,5 +619,31 @@ string* getvalues(string str){
 
         cout<<arr[i]<<" "<<endl;
     }
-    return arr;
+
+    //passing values
+    string password;
+    stringstream pass(arr[3]);
+    pass>>password;
+
+    stringstream getInt(arr[2]);
+    stringstream getFile(arr[1]);
+
+    string fPath;
+    getInt>>PORT; 
+    getFile>>fPath;
+
+    char f[fPath.size() + 1];
+    strcpy(f, fPath.c_str());
+
+    DIR* dir = opendir(f);
+    if (dir)
+    {
+        cout<<"directry exist"<<endl;
+        closedir(dir);
+    }
+    else
+    {
+        cout<<"directry does not exit"<<endl;
+    }
+    
 }
