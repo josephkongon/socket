@@ -24,7 +24,6 @@ using namespace std;
 
 #define DEFAULT_BUFLEN 1024
 
-
 void PANIC(char* msg);
 #define PANIC(msg)  { perror(msg); exit(-1); }
 
@@ -34,7 +33,7 @@ string getMsg(string );
 
 int PORT;
 bool users=false;
-string filePath;
+string path;
 void getReply(string,int,string);
 /*--------------------------------------------------------------------*/
 /*--- Child - echo server                                         ---*/
@@ -259,10 +258,13 @@ if(users){
         char msg[]="list of all files\n";
         //
         //reading all files in directory
-        char path[]="./files";
+ //       char path[]="./files";
+
+        char p[path.size() + 1];
+        strcpy(p, path.c_str());
         
         DIR *dir;
-        dir=opendir(path);
+        dir=opendir(p);
         struct dirent *enter;
        
         
@@ -316,7 +318,7 @@ if(users){
     }
       else if(arr[0]=="get"){
         //list files
-        string path="./files";
+//        string path="./files";
         
 
 
@@ -370,7 +372,7 @@ if(users){
      else if(arr[0]=="put"){
         //copy file
 
-        string path="./files";
+//        string path="./files";
         
 
 
@@ -483,7 +485,7 @@ if(users){
     else if(arr[0]=="del"){
         //delete file from directory
 
-          string path="./files";
+//         string path="./files";
         
 
 
@@ -621,29 +623,36 @@ void getvalues(){
     }
 
     //passing values
-    string password;
-    stringstream pass(arr[3]);
-    pass>>password;
+    bool pas=true;
+    do{
+        
+        string password;
+        stringstream pass(arr[3]);
+        pass>>password;
 
-    stringstream getInt(arr[2]);
-    stringstream getFile(arr[1]);
+        stringstream getInt(arr[2]);
+        stringstream getFile(arr[1]);
 
-    string fPath;
-    getInt>>PORT; 
-    getFile>>fPath;
+        string fPath;
+        getInt>>PORT; 
+        getFile>>path;
 
-    char f[fPath.size() + 1];
-    strcpy(f, fPath.c_str());
+        char f[path.size() + 1];
+        strcpy(f, path.c_str());
 
-    DIR* dir = opendir(f);
-    if (dir)
-    {
-        cout<<"directry exist"<<endl;
-        closedir(dir);
-    }
-    else
-    {
-        cout<<"directry does not exit"<<endl;
-    }
+        DIR* dir = opendir(f);
+        if (dir)
+        {
+
+            cout<<"directry exist"<<endl;
+            closedir(dir);
+            pas=false;
+        }
+        else
+        {
+            cout<<"directry does not exit"<<endl;
+            exit(0);
+        }
+    }while(pas);
     
 }
