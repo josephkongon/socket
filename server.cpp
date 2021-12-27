@@ -622,7 +622,6 @@ void getvalues(){
         cout<<arr[i]<<" "<<endl;
     }
 
-    //passing values
     bool pas=true;
     do{
         
