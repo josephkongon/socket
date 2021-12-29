@@ -34,6 +34,7 @@ string getMsg(string );
 int PORT;
 bool users=false;
 string path;
+string passwordPath;
 void getReply(string,int,string);
 /*--------------------------------------------------------------------*/
 /*--- Child - echo server                                         ---*/
@@ -623,11 +624,14 @@ void getvalues(){
     }
 
     bool pas=true;
+    bool pass1=true;
+    
     do{
         
-        string password;
         stringstream pass(arr[3]);
-        pass>>password;
+        pass>>passwordPath;
+
+
 
         stringstream getInt(arr[2]);
         stringstream getFile(arr[1]);
@@ -635,6 +639,10 @@ void getvalues(){
         string fPath;
         getInt>>PORT; 
         getFile>>path;
+
+        char fp[passwordPath.size() + 1];
+        strcpy(fp, passwordPath.c_str());
+
 
         char f[path.size() + 1];
         strcpy(f, path.c_str());
@@ -652,6 +660,22 @@ void getvalues(){
             cout<<"directry does not exit"<<endl;
             exit(0);
         }
-    }while(pas);
+
+         DIR* direc = opendir(fp);
+        if (direc)
+        {
+
+            cout<<"directry exist"<<endl;
+            closedir(direc);
+            pass1=false;
+        }
+        else
+        {
+            cout<<"directry does not exit"<<endl;
+            exit(0);
+        }
+
+
+    }while(pas&&pass1);
     
 }
