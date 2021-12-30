@@ -215,7 +215,7 @@ void getReply(string str,int client,string Str1){
 
         string uName;
         string upass;
-         cout<<line<<endl;
+         //cout<<line<<endl;
         
         vector<string> getUser;
         stringstream ss(line);
@@ -683,6 +683,8 @@ void getvalues(){
 	            pass1=false;
             }
         fclose(pasP);
+
+        
     }while(pas&&pass1);
     cout<<"File server is listening on localhost port "<<PORT<<endl;
     
