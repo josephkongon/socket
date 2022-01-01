@@ -15,6 +15,8 @@
 #include <bits/stdc++.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <stdio.h>
+#include <dirent.h>
 
 
 
@@ -434,20 +436,37 @@ void getReply(string str,int client,string Str1){
             char cflc[fl.size() + 1];
             strcpy(cflc, fl.c_str());
 
-            //creating file and writing to file
-            ofstream newfile;
-            newfile.open(fl);
             bool w=false;
+
+        char ct[content.size() + 1];
+            strcpy(ct, content.c_str());
+         FILE* pasP;
+
+        if ((pasP = fopen(cflc, "w")) == NULL)
+	        {
+	        	cout<<" "<<endl;
+			}
+            else
+            {
+               fputs(ct,pasP);
+               w=true;
+	           
+            }
+        fclose(pasP);
+            //creating file and writing to file
+           // fstream newfile;
+           // newfile.open(fl);
+            //bool w=false;
             
-            if(newfile.is_open()){
-                newfile<<content;
-                w=true;
+          //  if(newfile.is_open()){
+              //  newfile<<content;
+              //  w=true;
 
-                newfile.close();
-            }
-            else{
+              //  newfile.close();
+          //  }
+          //  else{
 
-            }
+          //  }
 
             FILE* fz = fopen(cstr, "r");
                 if (fz == NULL) {
