@@ -1,6 +1,9 @@
 This is a report prepare for the socket program on how it works and how it should be used
 
 1-> Starting the server
+        NOTE TO COMPILE THE CODE USE
+                server.cpp -o server -pthread -std=c++11
+                
         this is an example on how to  start the server with no errors
 
         server -d /home/student/files -p 2500 -u password
@@ -13,3 +16,5 @@ This is a report prepare for the socket program on how it works and how it shoul
 
         -u this should be the file path containing user names and password, /home/student/files/users.txt
 
+git repasitory
+https://github.com/josephkongon/socket
